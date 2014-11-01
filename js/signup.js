@@ -6,6 +6,7 @@
 
 document.addEventListener('DOMContentLoaded', onReady);
 function onReady() {
+	var theForm = document.getElementById("signup");
 	var elem = document.getElementById("states");
 	for (var i = 0; i < usStates.length; i++) {   
 	    var opt = document.createElement("option");
@@ -13,8 +14,6 @@ function onReady() {
 	    var theCurlyBrasketThings = usStates[i];
 	    var stateName = theCurlyBrasketThings["name"];
 	    var stateCode = theCurlyBrasketThings["code"];
-
-	    //console.log(i);
 
 		opt.value = stateCode;
 		
@@ -24,72 +23,124 @@ function onReady() {
 	}
 	occupation.addEventListener("change", occupationChooseOther);
 	document.getElementById("cancelButton").addEventListener('click', goToGoogle);
-	//document.getElementById("signup").addEventListener('submitButton', onSubmit);
+	theForm.addEventListener('submit', onSubmit);
+
+
 }
 function occupationChooseOther(){
-	//console.log("get in 1");
 	if (document.getElementById("occupation").value != "other") {
 		document.getElementById("occupationOther").style.display = "none";
-	//	console.log("get in 2");
 	} else {
 		document.getElementById("occupationOther").style.display = "inherit";
 	}
 }
+
 function goToGoogle(){
 	window.confirm("You are going to Google!");
 	window.location.href = "http://google.com";
 }
-/*function onSubmit(evt){
-	var valid = validateForm(this);
-    console.log("This works");
+
+function onSubmit(evt){
+    var valid = validateForm(this);
+
+    //if the form is invalid and the event object has a method called preventDefault,
+    //call it to stop the form from being submitted to the server
+    //this method is now part of the standard, but it's new, so older browsers
+    //will not expose this method on the event object
     if (!valid && evt.preventDefault) {
+        evt.preventDefault();
+    }
+
+    //some older browsers will look at the returnValue property of the event object
+    //while other older browsers will pay attention to the value returned from
+    //the event handler function itself
+    //to catch both cases, we will set the returnValue property to our valid variable
+    //AND return the valid variable's value from our function
+    evt.returnValue = valid;
+    return valid;
+} //onSubmit()
+/*	try { 
+        if(!valid && evt.preventDefault) throw evt.preventDefault();
+    }
+    catch(err) {
+       alert("The red boxed input(s) is (are) invalid.");
+
+    }
+    finally{
+	    evt.returnValue = valid;
+	   	return valid;
+	}*/
+/*    if (!valid && evt.preventDefault) {
     	evt.preventDefault();
     }
     evt.returnValue = valid;
     return valid;
-
-}
+*/
 function validateForm(form) {
 	var requiredFields = ['firstName', 'lastName', 'address1', 'city', 'state','occupationOther'];
-	    //console.log("get in 1");
-
-	var checkFields = requiredFields.forEach(validateRequiredFields, form);
-	/*var checkZip = validateZip('zip');
-	if (chcekZip && checkFields){
-		return true;
-	} else {
-		return false;
+	var valid = true;
+	for (var i = 0; i < requiredFields.length; i++) {
+		valid &= validateRequiredField(requiredFields[i], form);
 	}
-	
-	//occupation
-	//var checkBirthDate = validateBirthDate('birthdate');
+
+	valid &= validateZip('zip', form);
+	valid &= validateBirthDate('birthdate', form);
+
+	return valid;
 }
-function validateRequiredField(field) {
+function validateRequiredField(field, form) {
 
-    if (0 == this[field].value.trim().length){
+    if (0 == form[field].value.trim().length){
 
-        this[field].className = 'invalid-field form-control';
+        form[field].className = 'invalid-field form-control';
         return false;
     } else {
-        this[field].className = 'form-control';
+        form[field].className = 'form-control';
 
         return true;
     }
 } 
-function validateZip(field){
-	var zip = field.value; 
-	var zipRegExp = new RegExp('\\d{5}');
-	var zipRegExp2 = new RegExp('[a-z|A-Z]+');
-	if (!zipRegExp.test(zip) || zipRegExp2) { //symbol
-		field.className = 'invalid-field form-control';
+function validateZip(field, form){
+	var zip = form[field].value.trim(); 
+	var zipRegExp = new RegExp('\\d{5}'); 
+
+	if (!zipRegExp.test(zip)) { 
+		form[field].className = 'invalid-field form-control';
         return false;
 	} else {
-       field.className = 'form-control';
+       form[field].className = 'form-control';
         return true;																	
     }    
 }
-function validateBirthDate(field){
+
+function validateBirthDate(field, form) {
 	var currentDate = new Date();
-	var birthDateEntered = field.value;
-	if () 
-}*/
+   	
+   	if(form[field].value.toString() == "") {
+   		form[field].className = 'invalid-field form-control';
+        return false;
+   	}
+
+   	var dateEntered =  Date.parse(form[field].value);
+	var birthdateEntered = new Date(dateEntered);
+
+	var day =currentDate.getDate()-(birthdateEntered.getDate());;
+	var month = currentDate.getMonth()-(birthdateEntered.getMonth());
+	var year = currentDate.getFullYear()-(birthdateEntered.getFullYear());	
+	if (day < 0) {
+		month -= 1;
+	} 
+	if (month < 0) {
+		year -= 1;
+
+	}
+	if (year < 13) {
+		document.getElementById("birthdateMessage").innerHTML = "You're only " + year + " years old, must be 13 to submit";
+		form[field].className = 'invalid-field form-control';
+        return false;
+	} else {
+		document.getElementById("birthdateMessage").innerHTML = "";
+        form[field].className = 'form-control';
+        return true;																	
+    }   
+}
