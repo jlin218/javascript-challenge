@@ -54,10 +54,13 @@ function onSubmit(evt) {
 } 
 
 function validateForm(form) {
-	var requiredFields = ['firstName', 'lastName', 'address1', 'city', 'state','occupationOther'];
+	var requiredFields = ['firstName', 'lastName', 'address1', 'city', 'state'];
 	var valid = true;
 	for (var i = 0; i < requiredFields.length; i++) {
 		valid &= validateRequiredField(requiredFields[i], form);
+	}
+	if (form['occupation'].value == "other") {
+		valid &= validateRequiredField('occupationOther', form);
 	}
 	valid &= validateZip('zip', form);
 	valid &= validateBirthDate('birthdate', form);
@@ -96,7 +99,7 @@ function validateBirthDate(field, form) {
    	var dateEntered = Date.parse(form[field].value);
 	var birthdateEntered = new Date(dateEntered);
 
-	var day = currentDate.getDate() - (birthdateEntered.getDate());;
+	var day = currentDate.getDate() - (birthdateEntered.getDate());
 	var month = currentDate.getMonth() - (birthdateEntered.getMonth());
 	var year = currentDate.getFullYear() - (birthdateEntered.getFullYear());	
 	if (day < 0) {
